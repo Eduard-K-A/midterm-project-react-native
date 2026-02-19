@@ -4,48 +4,118 @@ import { Job } from '../types';
 
 const apiClient = axios.create({
   baseURL: 'https://empllo.com/api/v1',
+  timeout: 10000,
 });
 
 interface RawJob {
-  id?: string;
   title?: string;
-  company?: string;
-  location?: string;
-  salary?: string;
-  type?: string;
+  companyName?: string;
+  companyLogo?: string;
+  jobType?: string;
+  workModel?: string;
+  seniorityLevel?: string;
+  minSalary?: number | null;
+  maxSalary?: number | null;
+  currency?: string;
+  locations?: string[];
+  tags?: string[];
   description?: string;
-  tags?: string[] | string;
-  postedAt?: string;
-  logo?: string;
+  pubDate?: number;
+  expiryDate?: number;
+  applicationLink?: string;
+  guid?: string;
+  mainCategory?: string;
   [key: string]: unknown;
 }
 
 interface JobsApiResponse {
-  data?: RawJob[];
   jobs?: RawJob[];
+  total_count?: number;
+  offset?: number;
+  limit?: number;
+  usage?: string;
+  updated_at?: number;
   [key: string]: unknown;
 }
+
+const formatSalary = (
+  minSalary: number | null | undefined,
+  maxSalary: number | null | undefined,
+  currency: string | undefined,
+): string | undefined => {
+  if (minSalary === null || minSalary === undefined) {
+    return undefined;
+  }
+
+  const currencySymbol =
+    currency === 'USD'
+      ? '$'
+      : currency === 'EUR'
+      ? '€'
+      : currency === 'GBP'
+      ? '£'
+      : currency === 'CAD'
+      ? 'C$'
+      : currency === 'BRL'
+      ? 'R$'
+      : currency === 'ILS'
+      ? '₪'
+      : currency || '';
+
+  if (maxSalary && maxSalary !== minSalary) {
+    return `${currencySymbol}${minSalary.toLocaleString()}-${currencySymbol}${maxSalary.toLocaleString()}`;
+  }
+
+  return `${currencySymbol}${minSalary.toLocaleString()}`;
+};
+
+const formatLocation = (locations: string[] | undefined): string => {
+  if (!locations || locations.length === 0) {
+    return 'Remote / Unspecified';
+  }
+
+  if (locations.length === 1) {
+    return locations[0];
+  }
+
+  if (locations.length <= 3) {
+    return locations.join(', ');
+  }
+
+  return `${locations.slice(0, 2).join(', ')}, +${locations.length - 2} more`;
+};
+
+const formatDate = (timestamp: number | undefined): string | undefined => {
+  if (!timestamp) {
+    return undefined;
+  }
+
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
 
 const normalizeJob = (raw: RawJob): Job => {
   const generatedId = uuid.v4().toString();
 
-  const tagsArray: string[] | undefined = Array.isArray(raw.tags)
-    ? raw.tags.map((tag) => String(tag))
-    : typeof raw.tags === 'string'
-    ? raw.tags.split(',').map((tag) => tag.trim())
-    : undefined;
+  const salary = formatSalary(raw.minSalary, raw.maxSalary, raw.currency);
+  const location = formatLocation(raw.locations);
+  const postedAt = formatDate(raw.pubDate);
 
   return {
-    id: raw.id ?? generatedId,
+    id: raw.guid ?? generatedId,
     title: raw.title ?? 'Untitled Role',
-    company: raw.company ?? 'Unknown Company',
-    location: raw.location ?? 'Remote / Unspecified',
-    salary: raw.salary,
-    type: raw.type,
+    company: raw.companyName ?? 'Unknown Company',
+    location,
+    salary,
+    type: raw.jobType,
     description: raw.description,
-    tags: tagsArray,
-    postedAt: raw.postedAt,
-    logo: raw.logo,
+    tags: Array.isArray(raw.tags) ? raw.tags.map((tag) => String(tag)) : undefined,
+    postedAt,
+    logo: raw.companyLogo,
   };
 };
 
@@ -54,22 +124,33 @@ export const fetchJobsFromApi = async (): Promise<Job[]> => {
     const response = await apiClient.get<JobsApiResponse>('/');
 
     const payload = response.data;
-    const rawJobs: RawJob[] =
-      (Array.isArray(payload) ? (payload as RawJob[]) : null) ??
-      (Array.isArray(payload.data) ? payload.data : []) ??
-      (Array.isArray(payload.jobs) ? payload.jobs : []);
 
-    if (!rawJobs || rawJobs.length === 0) {
+    if (!payload || typeof payload !== 'object') {
+      return [];
+    }
+
+    const rawJobs: RawJob[] = Array.isArray(payload.jobs) ? payload.jobs : [];
+
+    if (rawJobs.length === 0) {
       return [];
     }
 
     return rawJobs.map(normalizeJob);
   } catch (error) {
     const axiosError = error as AxiosError;
-    const message =
-      axiosError.response?.data && typeof axiosError.response.data === 'object'
-        ? 'Failed to fetch jobs from server'
-        : axiosError.message || 'Network error while fetching jobs';
+    let message = 'Network error while fetching jobs';
+
+    if (axiosError.response) {
+      if (axiosError.response.status === 404) {
+        message = 'Jobs endpoint not found. Please check the API URL.';
+      } else if (axiosError.response.status >= 500) {
+        message = 'Server error. Please try again later.';
+      } else {
+        message = 'Failed to fetch jobs from server';
+      }
+    } else if (axiosError.message) {
+      message = axiosError.message;
+    }
 
     throw new Error(message);
   }
