@@ -39,7 +39,7 @@ This project is a polished, production-style Job Finder mobile application built
 The app integrates with the `https://empllo.com/api/v1` API.
 
 - **Base URL**: `https://empllo.com/api/v1`
-- **Jobs Endpoint**: `GET /jobs`
+- **Jobs Endpoint**: `GET /`
   - The response is normalized defensively in `jobsApi.ts` to match the internal `Job` interface:
     - Fields: `title`, `company`, `location`, `salary`, `type`, `description`, `tags`, `postedAt`, `logo`.
     - Each job receives a UUID (`id`) via `react-native-uuid` if the API does not provide one.
