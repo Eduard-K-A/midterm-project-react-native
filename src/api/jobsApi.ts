@@ -51,7 +51,7 @@ const normalizeJob = (raw: RawJob): Job => {
 
 export const fetchJobsFromApi = async (): Promise<Job[]> => {
   try {
-    const response = await apiClient.get<JobsApiResponse>('/jobs');
+    const response = await apiClient.get<JobsApiResponse>('/');
 
     const payload = response.data;
     const rawJobs: RawJob[] =
