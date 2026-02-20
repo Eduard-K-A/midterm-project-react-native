@@ -80,7 +80,6 @@ export const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 15,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
 
