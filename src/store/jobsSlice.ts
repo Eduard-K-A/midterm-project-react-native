@@ -54,8 +54,8 @@ export const selectFilteredJobs = createSelector(
 
     return jobsState.jobs.filter((job) => {
       const title = job.title.toLowerCase();
-      const company = job.company.toLowerCase();
-      const location = job.location.toLowerCase();
+      const company = job.companyName.toLowerCase();
+      const location = job.locations.join(' ').toLowerCase();
       return (
         title.includes(query) ||
         company.includes(query) ||
