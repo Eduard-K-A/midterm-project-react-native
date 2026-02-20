@@ -10,6 +10,10 @@ export const darkColors: ColorTokens = {
   textMuted: '#A0AEC0',
   border: '#2D3748',
   shadow: '#4F8EF740',
+  onPrimary: '#FFFFFF',
+  onDestructive: '#FFFFFF',
+  onSuccess: '#071019',
+  overlay: '#00000066',
 };
 
 export const lightColors: ColorTokens = {
@@ -22,5 +26,9 @@ export const lightColors: ColorTokens = {
   textMuted: '#64748B',
   border: '#E2E8F0',
   shadow: '#00000015',
+  onPrimary: '#FFFFFF',
+  onDestructive: '#FFFFFF',
+  onSuccess: '#FFFFFF',
+  overlay: '#00000066',
 };
 
