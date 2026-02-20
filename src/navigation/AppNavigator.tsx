@@ -7,6 +7,7 @@ import { View, Text } from 'react-native';
 import { useTheme } from '../hooks/useTheme';
 import JobFinderScreen from '../screens/JobFinderScreen';
 import SavedJobsScreen from '../screens/SavedJobsScreen';
+import JobDetailScreen from '../screens/JobDetailScreen';
 import { useAppSelector } from '../store';
 import { selectSavedJobs } from '../store/savedJobsSlice';
 import { styles } from './AppNavigator.styles';
@@ -51,8 +52,8 @@ const TabNavigator: React.FC = () => {
             <View style={styles.iconContainer}>
               <Ionicons name={iconName as never} size={size} color={color} />
               {route.name === 'SavedJobs' && savedCount > 0 && (
-                <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}>
-                  <Text style={[styles.badgeText, { color: isDark ? '#0A0F1E' : '#FFFFFF' }]}>
+                <View style={[styles.badgeContainer, { backgroundColor: colors.primary }]}> 
+                  <Text style={[styles.badgeText, { color: colors.onPrimary }]}> 
                     {savedCount}
                   </Text>
                 </View>
@@ -108,6 +109,7 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer theme={navigationTheme}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Root" component={TabNavigator} />
+        <Stack.Screen name="JobDetail" component={JobDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
