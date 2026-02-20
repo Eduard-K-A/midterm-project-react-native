@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Modal,
   View,
@@ -8,7 +8,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +17,7 @@ import { ApplicationFormModalProps, ApplicationFormData } from '../types';
 import { applicationSchema } from '../utils/validators';
 import { useTheme } from '../hooks/useTheme';
 import { styles } from './ApplicationFormModal.styles';
+import SuccessModal from './SuccessModal';
 
 const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   visible,
@@ -40,7 +40,7 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
     defaultValues: {
       name: '',
       email: '',
-      contactNumber: '',
+      contactNumber: '+63',
       whyShouldWeHireYou: '',
     },
   });
@@ -56,33 +56,23 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
 
   const onSubmit = async (data: ApplicationFormData) => {
     try {
+      // show immediate feedback
+      setLocalLoading(true);
+
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const title = job?.title ?? 'this role';
-      const company = job?.company ?? 'the company';
-
-      Alert.alert(
-        'Application Submitted! 🎉',
-        `Good luck with your application for ${title} at ${company}!`,
-        [
-          {
-            text: 'Okay',
-            onPress: () => {
-              reset();
-              onSuccess();
-              if (sourceScreen === 'JobFinder') {
-                onClose();
-              } else {
-                onClose();
-              }
-            },
-          },
-        ],
-      );
+      reset();
+      onSuccess();
+      setSuccessVisible(true);
     } catch {
-      Alert.alert('Submission Failed', 'Something went wrong while submitting your application.');
+      // set errors via form state - keep simple here
+    } finally {
+      setLocalLoading(false);
     }
   };
+
+  const [localLoading, setLocalLoading] = useState(false);
+  const [successVisible, setSuccessVisible] = useState(false);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={handleClose}>
@@ -96,7 +86,7 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
               Apply for {job?.title ?? 'Job'}
             </Text>
             <Text style={[styles.headerSubtitle, { color: colors.textMuted }]} numberOfLines={1}>
-              {job?.company}
+              {job?.companyName}
             </Text>
           </View>
           <Pressable
@@ -187,10 +177,24 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
                       backgroundColor: colors.surface,
                     },
                   ]}
-                  placeholder="+1 555 000 0000"
+                  placeholder="+63XXXXXXXXXX"
                   placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
-                  onChangeText={onChange}
+                  onChangeText={(text) => {
+                    let next = String(text ?? '');
+                    // ensure prefix +63 is enforced
+                    const digits = next.replace(/[^0-9]/g, '');
+                    if (next.startsWith('+63')) {
+                      next = '+63' + digits.slice(2);
+                    } else if (digits.startsWith('63')) {
+                      next = '+' + digits;
+                    } else {
+                      // strip leading zeros
+                      const local = digits.replace(/^0+/, '');
+                      next = '+63' + local;
+                    }
+                    onChange(next);
+                  }}
                   value={value}
                   keyboardType="phone-pad"
                 />
@@ -241,24 +245,32 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
           </View>
         </ScrollView>
         <View style={[styles.footer, { borderTopColor: colors.border }]}>
-          <Pressable
-            style={[
-              styles.submitButton,
-              {
-                backgroundColor: isValid && !isSubmitting ? colors.primary : colors.border,
-              },
-            ]}
-            disabled={!isValid || isSubmitting}
-            onPress={handleSubmit(onSubmit)}
-          >
-            {isSubmitting ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.submitButtonText}>Submit Application</Text>
-            )}
-          </Pressable>
+            <Pressable
+              style={[
+                styles.submitButton,
+                {
+                  backgroundColor: isValid && !localLoading ? colors.primary : colors.border,
+                },
+              ]}
+              disabled={!isValid || localLoading}
+              onPress={handleSubmit(onSubmit)}
+            >
+              {localLoading ? (
+                <ActivityIndicator color={colors.onPrimary} />
+              ) : (
+                <Text style={[styles.submitButtonText, { color: colors.onPrimary }]}>Submit Application</Text>
+              )}
+            </Pressable>
         </View>
       </KeyboardAvoidingView>
+      <SuccessModal
+        visible={successVisible}
+        message={`Good luck with your application for ${job?.title ?? 'the role'} at ${job?.companyName ?? ''}`}
+        onClose={() => {
+          setSuccessVisible(false);
+          onClose();
+        }}
+      />
     </Modal>
   );
 };
