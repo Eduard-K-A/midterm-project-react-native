@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
-import { View, Text, Pressable, GestureResponderEvent } from 'react-native';
+import { View, Text, Pressable, GestureResponderEvent, Image } from 'react-native';
 import { Job } from '../types';
 import { useTheme } from '../hooks/useTheme';
-import { formatCurrency, getInitials } from '../utils/helpers';
+import { formatSalary, getInitials } from '../utils/helpers';
 import { useAppDispatch, useAppSelector } from '../store';
-import { saveJob, selectIsJobSaved } from '../store/savedJobsSlice';
+import { persistSaveJob, persistRemoveJob, selectIsJobSaved } from '../store/savedJobsSlice';
 import { styles } from './JobCard.styles';
+import { useNavigation } from '@react-navigation/native';
+import ConfirmModal from './ConfirmModal';
 
 interface JobCardProps {
   job: Job;
@@ -15,13 +17,19 @@ interface JobCardProps {
 const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
-  const isSaved = useAppSelector(selectIsJobSaved(job.id));
+  const navigation = useNavigation();
+  const isSaved = useAppSelector(selectIsJobSaved(job.guid));
 
-  const salaryLabel = useMemo(() => formatCurrency(job.salary), [job.salary]);
+  const salaryLabel = useMemo(
+    () => formatSalary(job.minSalary, job.maxSalary, job.currency),
+    [job.minSalary, job.maxSalary, job.currency],
+  );
 
   const handleSavePress = (_event: GestureResponderEvent) => {
     if (!isSaved) {
-      dispatch(saveJob(job));
+      dispatch(persistSaveJob(job));
+    } else {
+      setConfirmVisible(true);
     }
   };
 
@@ -29,10 +37,24 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
     onApplyPress(job);
   };
 
-  const initials = useMemo(() => getInitials(job.company), [job.company]);
+  const handleCardPress = () => {
+    // navigate to detail screen with job payload
+    // @ts-ignore - navigation typing from different navigators
+    navigation.navigate('JobDetail', { job });
+  };
+
+  const initials = useMemo(() => getInitials(job.companyName), [job.companyName]);
+  const [confirmVisible, setConfirmVisible] = React.useState(false);
+
+  const handleConfirmRemove = () => {
+    dispatch(persistRemoveJob(job.guid));
+    setConfirmVisible(false);
+  };
 
   return (
-    <View
+    <>
+      <Pressable onPress={handleCardPress} style={{ marginBottom: 16 }} android_ripple={{ color: colors.overlay }}>
+      <View
       style={[
         styles.card,
         {
@@ -41,17 +63,22 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
           shadowColor: colors.shadow,
         },
       ]}
-    >
+      >
+         </View>
       <View style={[styles.headerRow]}>
-        <View style={[styles.logo, { backgroundColor: colors.primary }]}>
-          <Text style={[styles.logoText, { color: '#FFFFFF' }]}>{initials}</Text>
-        </View>
+        {job.companyLogo ? (
+          <Image source={{ uri: job.companyLogo }} style={styles.logoImage} />
+        ) : (
+          <View style={[styles.logo, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.logoText, { color: colors.onPrimary }]}>{initials}</Text>
+          </View>
+        )}
         <View style={styles.headerContent}>
           <Text style={[styles.title, { color: colors.text }]} numberOfLines={1}>
             {job.title}
           </Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]} numberOfLines={1}>
-            {job.company} • {job.location}
+            {job.companyName} • {job.locations?.join(', ')}
           </Text>
           <View style={styles.chipRow}>
             {salaryLabel && (
@@ -59,9 +86,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
                 <Text style={[styles.badgeText, { color: colors.primary }]}>{salaryLabel}</Text>
               </View>
             )}
-            {job.type && (
+            {job.jobType && (
               <View style={[styles.chip, { backgroundColor: colors.background }]}>
-                <Text style={[styles.chipText, { color: colors.textMuted }]}>{job.type}</Text>
+                <Text style={[styles.chipText, { color: colors.textMuted }]}>{job.jobType}</Text>
               </View>
             )}
           </View>
@@ -77,24 +104,31 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
             },
           ]}
           onPress={handleSavePress}
+          android_ripple={{ color: colors.border }}
         >
-          <Text
-            style={[
-              styles.saveButtonText,
-              { color: isSaved ? '#0A0F1E' : colors.text },
-            ]}
-          >
+          <Text style={[styles.saveButtonText, { color: isSaved ? colors.onSuccess : colors.text }]}>
             {isSaved ? '✓ Saved' : 'Save Job'}
           </Text>
         </Pressable>
         <Pressable
           style={[styles.applyButton, { backgroundColor: colors.primary }]}
           onPress={handleApplyPress}
+          android_ripple={{ color: colors.overlay }}
         >
-          <Text style={[styles.applyButtonText, { color: '#FFFFFF' }]}>Apply</Text>
+          <Text style={[styles.applyButtonText, { color: colors.onPrimary }]}>
+            Apply
+          </Text>
         </Pressable>
       </View>
-    </View>
+    </Pressable>
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Remove this job from saved?"
+        message={`Remove ${job.title} from saved jobs?`}
+        onConfirm={handleConfirmRemove}
+        onCancel={() => setConfirmVisible(false)}
+      />
+    </>
   );
 };
 
