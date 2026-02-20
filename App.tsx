@@ -17,9 +17,17 @@ import { ThemeProvider } from './src/theme/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useTheme } from './src/hooks/useTheme';
 import { styles } from './App.styles';
+import { useEffect } from 'react';
+import { useAppDispatch } from './src/store';
+import { loadSavedJobs } from './src/store/savedJobsSlice';
 
 const AppContent: React.FC = () => {
   const { colors } = useTheme();
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(loadSavedJobs());
+  }, [dispatch]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
