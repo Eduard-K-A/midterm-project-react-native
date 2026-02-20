@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import ThemeToggle from '../components/ThemeToggle';
 import EmptyState from '../components/EmptyState';
 import { useAppDispatch, useAppSelector } from '../store';
-import { selectSavedJobs, removeJob } from '../store/savedJobsSlice';
+import { selectSavedJobs, persistRemoveJob } from '../store/savedJobsSlice';
+import ConfirmModal from '../components/ConfirmModal';
 import JobCard from '../components/JobCard';
 import ApplicationFormModal from '../components/ApplicationFormModal';
 import { Job } from '../types';
@@ -32,19 +33,25 @@ const SavedJobsScreen: React.FC = () => {
 
   const handleModalSuccess = () => {};
 
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<Job | null>(null);
+
   const handleRemoveJob = (job: Job) => {
-    Alert.alert(
-      'Remove Saved Job',
-      `Are you sure you want to remove ${job.title} at ${job.company} from saved jobs?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => dispatch(removeJob(job.id)),
-        },
-      ],
-    );
+    setPendingRemove(job);
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmRemove = () => {
+    if (pendingRemove) {
+      dispatch(persistRemoveJob(pendingRemove.guid));
+    }
+    setPendingRemove(null);
+    setConfirmVisible(false);
+  };
+
+  const handleCancelRemove = () => {
+    setPendingRemove(null);
+    setConfirmVisible(false);
   };
 
   const renderItem = ({ item }: { item: Job }) => (
@@ -87,11 +94,19 @@ const SavedJobsScreen: React.FC = () => {
       ) : (
         <FlatList
           data={savedJobs}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.guid}
           renderItem={renderItem}
           contentContainerStyle={styles.listContent}
         />
       )}
+
+      <ConfirmModal
+        visible={confirmVisible}
+        title="Remove this job from saved?"
+        message={`Are you sure you want to remove ${pendingRemove?.title ?? 'this job'} from saved jobs?`}
+        onConfirm={handleConfirmRemove}
+        onCancel={handleCancelRemove}
+      />
 
       <ApplicationFormModal
         visible={modalVisible}
