@@ -23,12 +23,12 @@ const ThemeToggle: React.FC = () => {
   });
 
   const handlePress = () => {
+    // toggle theme immediately so UI updates without delay
+    toggleTheme();
     Animated.spring(rotateAnim, {
       toValue: isDark ? 0 : 1,
       useNativeDriver: true,
-    }).start(() => {
-      toggleTheme();
-    });
+    }).start();
   };
 
   return (
