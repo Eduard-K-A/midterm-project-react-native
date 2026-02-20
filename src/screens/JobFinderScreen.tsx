@@ -102,24 +102,24 @@ const JobFinderScreen: React.FC = () => {
           description="Try a different search term or clear your filters to see more opportunities."
         />
       ) : (
-        <FlatList
-          data={jobs}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-          refreshControl={
-            <RefreshControl
-              refreshing={jobsState.loading}
-              onRefresh={onRefresh}
-              tintColor={colors.primary}
+            <FlatList
+              data={jobs}
+              keyExtractor={(item) => item.guid}
+              renderItem={renderItem}
+              contentContainerStyle={styles.listContent}
+              refreshControl={
+                <RefreshControl
+                  refreshing={jobsState.loading}
+                  onRefresh={onRefresh}
+                  tintColor={colors.primary}
+                />
+              }
+              ListFooterComponent={
+                jobsState.loading ? (
+                  <ActivityIndicator style={styles.footerLoader} color={colors.primary} />
+                ) : null
+              }
             />
-          }
-          ListFooterComponent={
-            jobsState.loading ? (
-              <ActivityIndicator style={styles.footerLoader} color={colors.primary} />
-            ) : null
-          }
-        />
       )}
 
       <ApplicationFormModal
