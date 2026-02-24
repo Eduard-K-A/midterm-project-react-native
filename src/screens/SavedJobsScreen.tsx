@@ -1,5 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  Platform,
+  StyleSheet,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
 import ThemeToggle from '../components/ThemeToggle';
@@ -20,6 +27,8 @@ const SavedJobsScreen: React.FC = () => {
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [pendingRemove, setPendingRemove] = useState<Job | null>(null);
 
   const handleApplyPress = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -30,11 +39,6 @@ const SavedJobsScreen: React.FC = () => {
     setModalVisible(false);
     setSelectedJob(null);
   };
-
-  const handleModalSuccess = () => {};
-
-  const [confirmVisible, setConfirmVisible] = useState(false);
-  const [pendingRemove, setPendingRemove] = useState<Job | null>(null);
 
   const handleRemoveJob = (job: Job) => {
     setPendingRemove(job);
@@ -49,20 +53,23 @@ const SavedJobsScreen: React.FC = () => {
     setConfirmVisible(false);
   };
 
-  const handleCancelRemove = () => {
-    setPendingRemove(null);
-    setConfirmVisible(false);
-  };
-
   const renderItem = ({ item }: { item: Job }) => (
     <View style={styles.cardWrapper}>
       <JobCard job={item} onApplyPress={handleApplyPress} />
-      <Text
-        style={[styles.removeText, { color: colors.destructive }]}
+      <Pressable
+        style={({ pressed }) => [
+          styles.removeBtn,
+          { borderColor: colors.destructive },
+          pressed && { opacity: 0.6 },
+        ]}
         onPress={() => handleRemoveJob(item)}
+        android_ripple={{ color: colors.overlay }}
+        accessibilityLabel={`Remove ${item.title} from saved jobs`}
       >
-        Remove from saved
-      </Text>
+        <Text style={[styles.removeBtnText, { color: colors.destructive }]}>
+          ✕  Remove
+        </Text>
+      </Pressable>
     </View>
   );
 
@@ -72,47 +79,65 @@ const SavedJobsScreen: React.FC = () => {
         styles.container,
         {
           backgroundColor: colors.background,
-          paddingTop: insets.top + 12,
+          paddingTop: insets.top + (Platform.OS === 'ios' ? 8 : 12),
         },
       ]}
     >
+      {/* ── Header ─────────────────────────────────────────────── */}
       <View style={styles.headerRow}>
-        <View>
+        <View style={styles.headerText}>
           <Text style={[styles.title, { color: colors.text }]}>Saved Jobs</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            Keep track of roles you care about
+            Roles you're keeping an eye on
           </Text>
         </View>
         <ThemeToggle />
       </View>
 
+      {/* ── Count badge ────────────────────────────────────────── */}
+      {savedJobs.length > 0 && (
+        <View style={[styles.countBadge, { backgroundColor: colors.overlay }]}>
+          <Text style={[styles.countText, { color: colors.textMuted }]}>
+            {savedJobs.length} saved {savedJobs.length === 1 ? 'job' : 'jobs'}
+          </Text>
+        </View>
+      )}
+
+      {/* ── List / Empty ───────────────────────────────────────── */}
       {savedJobs.length === 0 ? (
         <EmptyState
-          title="No saved jobs yet"
-          description="Any job you save will appear here for quick access when you are ready to apply."
+          title="Nothing saved yet"
+          description="Tap the save button on any job listing to keep it here for later."
         />
       ) : (
         <FlatList
           data={savedJobs}
           keyExtractor={(item) => item.guid}
           renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[
+            styles.listContent,
+            { paddingBottom: insets.bottom + 16 },
+          ]}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
       <ConfirmModal
         visible={confirmVisible}
-        title="Remove this job from saved?"
-        message={`Are you sure you want to remove ${pendingRemove?.title ?? 'this job'} from saved jobs?`}
+        title="Remove saved job?"
+        message={`Remove "${pendingRemove?.title ?? 'this job'}" from your saved list?`}
         onConfirm={handleConfirmRemove}
-        onCancel={handleCancelRemove}
+        onCancel={() => {
+          setPendingRemove(null);
+          setConfirmVisible(false);
+        }}
       />
 
       <ApplicationFormModal
         visible={modalVisible}
         job={selectedJob}
         onClose={handleModalClose}
-        onSuccess={handleModalSuccess}
+        onSuccess={() => {}}
         sourceScreen="SavedJobs"
       />
     </View>
@@ -120,4 +145,3 @@ const SavedJobsScreen: React.FC = () => {
 };
 
 export default SavedJobsScreen;
-
