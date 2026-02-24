@@ -2,6 +2,7 @@ import axios, { AxiosError } from 'axios';
 import uuid from 'react-native-uuid';
 import { Job } from '../types';
 
+//set api url
 const apiClient = axios.create({
   baseURL: 'https://empllo.com/api/v1',
   timeout: 10000,
