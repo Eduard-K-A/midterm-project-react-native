@@ -2,17 +2,23 @@ import { createAsyncThunk, createSelector, createSlice, PayloadAction } from '@r
 import { JobsState, Job } from '../types';
 import { fetchJobsFromApi } from '../api/jobsApi';
 
+const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 minutes
+
 const initialState: JobsState = {
   jobs: [],
   loading: false,
   error: null,
   searchQuery: '',
+  lastFetchTime: null,
 };
 
-export const fetchJobs = createAsyncThunk<Job[]>('jobs/fetchJobs', async () => {
-  const jobs = await fetchJobsFromApi();
-  return jobs;
-});
+export const fetchJobs = createAsyncThunk<Job[], boolean | undefined>(
+  'jobs/fetchJobs',
+  async (forceRefresh = false) => {
+    const jobs = await fetchJobsFromApi();
+    return jobs;
+  }
+);
 
 const jobsSlice = createSlice({
   name: 'jobs',
@@ -31,6 +37,7 @@ const jobsSlice = createSlice({
       .addCase(fetchJobs.fulfilled, (state, action: PayloadAction<Job[]>) => {
         state.loading = false;
         state.jobs = action.payload;
+        state.lastFetchTime = Date.now();
       })
       .addCase(fetchJobs.rejected, (state, action) => {
         state.loading = false;
@@ -62,6 +69,14 @@ export const selectFilteredJobs = createSelector(
         location.includes(query)
       );
     });
+  },
+);
+
+export const selectIsCacheValid = createSelector(
+  [selectJobsState],
+  (jobsState): boolean => {
+    if (!jobsState.lastFetchTime) return false;
+    return Date.now() - jobsState.lastFetchTime < CACHE_DURATION_MS;
   },
 );
 
