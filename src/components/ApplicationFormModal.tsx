@@ -36,11 +36,11 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
     watch,
   } = useForm<ApplicationFormData>({
     resolver: zodResolver(applicationSchema),
-    mode: 'onBlur',
+    mode: 'onChange',
     defaultValues: {
       name: '',
       email: '',
-      contactNumber: '+63',
+      contactNumber: '',
       whyShouldWeHireYou: '',
     },
   });
@@ -177,22 +177,22 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
                       backgroundColor: colors.surface,
                     },
                   ]}
-                  placeholder="+63XXXXXXXXXX"
+                  placeholder="09XXXXXXXX"
                   placeholderTextColor={colors.textMuted}
                   onBlur={onBlur}
                   onChangeText={(text) => {
                     let next = String(text ?? '');
-                    // ensure prefix +63 is enforced
                     const digits = next.replace(/[^0-9]/g, '');
+
+                    // if user explicitly starts with +63, keep normalized
                     if (next.startsWith('+63')) {
                       next = '+63' + digits.slice(2);
-                    } else if (digits.startsWith('63')) {
-                      next = '+' + digits;
-                    } else {
-                      // strip leading zeros
-                      const local = digits.replace(/^0+/, '');
-                      next = '+63' + local;
                     }
+                    // if user starts with 63 without plus, convert to +63
+                    else if (digits.startsWith('63') && !next.startsWith('09')) {
+                      next = '+63' + digits.slice(2);
+                    }
+                    // otherwise, just keep whatever they typed (no forced 09 prefix)
                     onChange(next);
                   }}
                   value={value}
