@@ -6,9 +6,6 @@ import {
   ScrollView,
   Pressable,
   Dimensions,
-  StyleSheet,
-  Linking,
-  Alert,
   Platform,
 } from 'react-native';
 import { useRoute, RouteProp, useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -19,6 +16,8 @@ import { formatSalary } from '../utils/helpers';
 import { useAppDispatch, useAppSelector } from '../store';
 import { selectIsJobSaved, persistSaveJob, persistRemoveJob } from '../store/savedJobsSlice';
 import ConfirmModal from '../components/ConfirmModal';
+import ApplicationFormModal from '../components/ApplicationFormModal';
+import { styles, sectionStyles } from './JobDetailScreen.styles';
 
 type ParamList = {
   JobDetail: { job: Job };
@@ -73,6 +72,7 @@ const JobDetailScreen: React.FC = () => {
   const guid = job.guid ?? '';
   const isSaved = useAppSelector(selectIsJobSaved(guid));
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Show back button when screen is focused
   useFocusEffect(
@@ -106,22 +106,8 @@ const JobDetailScreen: React.FC = () => {
     setConfirmVisible(false);
   };
 
-  const handleApply = async () => {
-    const url = job.applicationLink;
-    if (!url) {
-      Alert.alert('No application link', 'This job does not have an external application link.');
-      return;
-    }
-    try {
-      const supported = await Linking.canOpenURL(url);
-      if (supported) {
-        await Linking.openURL(url);
-      } else {
-        Alert.alert('Cannot open link', `Unable to open: ${url}`);
-      }
-    } catch {
-      Alert.alert('Error', 'Something went wrong while opening the application link.');
-    }
+  const handleApply = () => {
+    setModalVisible(true);
   };
 
   const pubDate = formatDate(job.pubDate);
@@ -232,7 +218,7 @@ const JobDetailScreen: React.FC = () => {
         {job.tags?.length ? (
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <SectionHeader label="Skills & Tags" color={colors.textMuted} />
-            <View style={styles.tagsWrap}>
+            <View style={sectionStyles.tagsWrap}>
               {job.tags?.map((tag) => (
                 <Chip key={tag} label={tag} bg={colors.overlay} text={colors.text} />
               ))}
@@ -290,12 +276,10 @@ const JobDetailScreen: React.FC = () => {
             styles.applyBtn,
             { backgroundColor: colors.primary },
             pressed && { opacity: 0.85 },
-            !job.applicationLink && { opacity: 0.5 },
           ]}
           onPress={handleApply}
           android_ripple={{ color: colors.overlay }}
           accessibilityLabel="Apply for job"
-          disabled={false /* we show an alert if no link */}
         >
           <Text style={[styles.btnText, { color: colors.onPrimary }]}>Apply Now →</Text>
         </Pressable>
@@ -308,107 +292,16 @@ const JobDetailScreen: React.FC = () => {
         onConfirm={handleConfirmRemove}
         onCancel={() => setConfirmVisible(false)}
       />
+
+      <ApplicationFormModal
+        visible={modalVisible}
+        job={job}
+        onClose={() => setModalVisible(false)}
+        onSuccess={() => {}}
+        sourceScreen="JobDetail"
+      />
     </View>
   );
 };
-
-// ── styles ───────────────────────────────────────────────────────────────────
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scrollContent: { paddingHorizontal: 16, paddingBottom: 100 },
-
-  card: {
-    borderRadius: 14,
-    borderWidth: StyleSheet.hairlineWidth,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 1,
-  },
-
-  headerRow: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
-  logo: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginRight: 12,
-  },
-  logoPlaceholder: {
-    width: 56,
-    height: 56,
-    borderRadius: 10,
-    borderWidth: StyleSheet.hairlineWidth,
-    marginRight: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerContent: { flex: 1 },
-  title: { fontSize: 18, fontWeight: '700', lineHeight: 24, marginBottom: 4 },
-  company: { fontSize: 14, fontWeight: '600' },
-
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-
-  footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-    flexDirection: 'row',
-    gap: 10,
-    borderTopWidth: StyleSheet.hairlineWidth,
-  },
-  saveBtn: {
-    flex: 1,
-    borderRadius: 50,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-  },
-  applyBtn: {
-    flex: 2,
-    borderRadius: 50,
-    paddingVertical: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  btnText: { fontSize: 14, fontWeight: '700' },
-});
-
-const sectionStyles = StyleSheet.create({
-  header: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  divider: { height: StyleSheet.hairlineWidth, marginBottom: 12 },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 50,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  chipText: { fontSize: 12, fontWeight: '600' },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-    gap: 10,
-  },
-  infoIcon: { fontSize: 16, width: 24, marginTop: 1 },
-  infoLabel: { fontSize: 11, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 1 },
-  infoValue: { fontSize: 14, fontWeight: '500' },
-  tagsWrap: { flexDirection: 'row', flexWrap: 'wrap' },
-});
 
 export default JobDetailScreen;
