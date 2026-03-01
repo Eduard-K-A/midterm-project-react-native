@@ -21,7 +21,7 @@ import { Job } from '../types';
 import { styles } from './SavedJobsScreen.styles';
 
 const SavedJobsScreen: React.FC = () => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const savedJobs = useAppSelector(selectSavedJobs);
   const dispatch = useAppDispatch();
@@ -106,8 +106,12 @@ const SavedJobsScreen: React.FC = () => {
 
       {/* ── Count badge ────────────────────────────────────────── */}
       {savedJobs.length > 0 && (
-        <View style={[styles.countBadge, { backgroundColor: colors.overlay }]}>
-          <Text style={[styles.countText, { color: colors.textMuted }]}>
+        <View style={[styles.countBadge, { 
+          backgroundColor: isDark ? (colors.overlay) : (colors.primaryLight),
+          borderColor: isDark ? colors.border : 'transparent',
+          borderWidth: isDark ? 0 : 1,
+        }]}>
+          <Text style={[styles.countText, { color: isDark ? colors.textMuted : colors.primary }]}>
             {savedJobs.length} saved {savedJobs.length === 1 ? 'job' : 'jobs'}
           </Text>
         </View>
