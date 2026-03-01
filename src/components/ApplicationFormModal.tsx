@@ -182,17 +182,20 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
                   onBlur={onBlur}
                   onChangeText={(text) => {
                     let next = String(text ?? '');
+                    // strip all non-digit characters so we can normalize prefixes
                     const digits = next.replace(/[^0-9]/g, '');
 
-                    // if user explicitly starts with +63, keep normalized
+                    // if user starts with international prefix, enforce +63 and keep rest
                     if (next.startsWith('+63')) {
                       next = '+63' + digits.slice(2);
                     }
-                    // if user starts with 63 without plus, convert to +63
+                    // if they type 63 at beginning without plus (e.g. "63917...")
+                    // treat it as international as well, since that is a common pattern
                     else if (digits.startsWith('63') && !next.startsWith('09')) {
                       next = '+63' + digits.slice(2);
                     }
-                    // otherwise, just keep whatever they typed (no forced 09 prefix)
+                    // otherwise we just leave the value alone; user may be typing
+                    // local number (starting with 0) or something else.
                     onChange(next);
                   }}
                   value={value}

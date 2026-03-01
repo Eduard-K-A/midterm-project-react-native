@@ -75,6 +75,10 @@ const JobDetailScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   // Show back button when screen is focused
+  // when this screen becomes active we tweak the navigation header so it
+  // appears over the job card (transparent background) and uses the theme's
+  // primary color for the back button. We use useFocusEffect instead of
+  // useEffect so the options are re-applied every time the user returns.
   useFocusEffect(
     useCallback(() => {
       navigation.setOptions({
@@ -166,6 +170,7 @@ const JobDetailScreen: React.FC = () => {
           {/* Chips row */}
           <View style={styles.chipsRow}>
             {job.jobType ? (
+              // jobType always uses the themed chip style
               <Chip 
                 label={job.jobType} 
                 bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.surface)}
@@ -173,6 +178,8 @@ const JobDetailScreen: React.FC = () => {
               />
             ) : null}
             {job.workModel ? (
+              // workModel and seniorityLevel share same logic; dark mode uses
+              // muted overlay and light mode uses primaryLight to keep contrast
               <Chip 
                 label={job.workModel} 
                 bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.surface)}
