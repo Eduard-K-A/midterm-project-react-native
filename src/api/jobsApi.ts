@@ -23,7 +23,6 @@ interface RawJob {
   description?: string;
   pubDate?: number;
   expiryDate?: number;
-  applicationLink?: string;
   guid?: string;
   mainCategory?: string;
   [key: string]: unknown;
@@ -121,7 +120,6 @@ const normalizeJob = (raw: RawJob): Job => {
       typeof raw.expiryDate === 'number'
         ? raw.expiryDate
         : Math.floor(Date.now() / 1000) + 30 * 24 * 3600,
-    applicationLink: String(raw.applicationLink ?? ''),
     guid: generatedGuid,
   };
 };
@@ -157,7 +155,6 @@ export const fetchJobsFromApi = async (): Promise<Job[]> => {
           "<h3>📋 Description</h3><ul><li>Build observability tools with real-time DB insights.</li>...</ul>",
         pubDate: 1771584318,
         expiryDate: 1774176318,
-        applicationLink: 'https://empllo.com/jobs/view/fullstack-engineer-cloud-4655990006',
         guid: 'https://empllo.com/jobs/view/fullstack-engineer-cloud-4655990006',
       };
 
