@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppDispatch, useAppSelector } from '../store';
-import { fetchJobs, selectFilteredJobs, selectJobsState, setSearchQuery } from '../store/jobsSlice';
+import { fetchJobs, selectFilteredJobs, selectJobsState, setSearchQuery, selectIsCacheValid } from '../store/jobsSlice';
 import { useTheme } from '../hooks/useTheme';
 import SearchBar from '../components/SearchBar';
 import SkeletonCard from '../components/SkeletonCard';
@@ -26,21 +26,25 @@ const JobFinderScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const jobsState = useAppSelector(selectJobsState);
   const jobs = useAppSelector(selectFilteredJobs);
+  const isCacheValid = useAppSelector(selectIsCacheValid);
 
   const [localQuery, setLocalQuery] = useState<string>('');
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    dispatch(fetchJobs());
-  }, [dispatch]);
+    // Fetch jobs only if cache is invalid
+    if (!isCacheValid) {
+      dispatch(fetchJobs(false));
+    }
+  }, [dispatch, isCacheValid]);
 
   useEffect(() => {
     dispatch(setSearchQuery(localQuery));
   }, [localQuery, dispatch]);
 
   const onRefresh = useCallback(() => {
-    dispatch(fetchJobs());
+    dispatch(fetchJobs(true));
   }, [dispatch]);
 
   const handleApplyPress = useCallback((job: Job) => {
