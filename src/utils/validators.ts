@@ -15,8 +15,8 @@ export const applicationSchema = z.object({
     .max(100, 'Email must not exceed 100 characters'),
   contactNumber: z
     .string()
-    .regex(/^[+]63\d{10}$/, 'Please enter a valid Philippine mobile number (+63XXXXXXXXXX)')
-    .length(13, 'Phone number must be in format +63XXXXXXXXXX'),
+    .regex(/^(09|\+63)\d{9}$/, 'Please enter a valid Philippine mobile number (09XXXXXXXX or +63XXXXXXXXXX)')
+    .refine(val => val.length === 11 || val.length === 13, 'Phone number must be 11 or 13 characters'),
   whyShouldWeHireYou: z
     .string()
     .min(50, 'Please provide at least 50 characters')
