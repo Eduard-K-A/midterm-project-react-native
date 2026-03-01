@@ -13,7 +13,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({ title, description }) => {
 
   return (
     <View style={styles.container}>
-      <View style={[styles.illustration, { borderColor: colors.border }]} />
       <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
     </View>

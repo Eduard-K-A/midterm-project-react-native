@@ -7,13 +7,6 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
-  illustration: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 2,
-    marginBottom: 16,
-  },
   title: {
     fontSize: 18,
     fontWeight: '600',
