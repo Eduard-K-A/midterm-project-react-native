@@ -6,6 +6,7 @@ import {
   Pressable,
   Platform,
   StyleSheet,
+  RefreshControl,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
@@ -29,6 +30,15 @@ const SavedJobsScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<Job | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const onRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    // Simulate a refresh delay
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 500);
+  }, []);
 
   const handleApplyPress = useCallback((job: Job) => {
     setSelectedJob(job);
@@ -119,6 +129,14 @@ const SavedJobsScreen: React.FC = () => {
             { paddingBottom: insets.bottom + 16 },
           ]}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefreshing}
+              onRefresh={onRefresh}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
+            />
+          }
         />
       )}
 
