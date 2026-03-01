@@ -22,7 +22,7 @@ import { useAppDispatch } from './src/store';
 import { loadSavedJobs } from './src/store/savedJobsSlice';
 
 const AppContent: React.FC = () => {
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -31,7 +31,7 @@ const AppContent: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style="light" />
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <AppNavigator />
     </View>
   );
