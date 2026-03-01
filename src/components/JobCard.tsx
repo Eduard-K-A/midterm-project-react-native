@@ -107,7 +107,7 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
           android_ripple={{ color: colors.border }}
         >
           <Text style={[styles.saveButtonText, { color: isSaved ? colors.onSuccess : colors.text }]}>
-            {isSaved ? '✓ Saved' : 'Save Job'}
+            {isSaved ? '✓ Saved' : 'Save'}
           </Text>
         </Pressable>
         <Pressable
