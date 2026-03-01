@@ -14,7 +14,6 @@ export interface Job {
   description: string; // HTML string
   pubDate: number; // Unix timestamp
   expiryDate: number; // Unix timestamp
-  applicationLink: string;
   guid: string; // unique identifier
 }
 
@@ -30,13 +29,14 @@ export interface ApplicationFormModalProps {
   job: Job | null;
   onClose: () => void;
   onSuccess: () => void;
-  sourceScreen: 'JobFinder' | 'SavedJobs';
+  sourceScreen: 'JobFinder' | 'SavedJobs' | 'JobDetail';
 }
 
 export interface ColorTokens {
   background: string;
   surface: string;
   primary: string;
+  primaryLight?: string;
   success: string;
   destructive: string;
   text: string;
@@ -60,6 +60,7 @@ export interface JobsState {
   loading: boolean;
   error: string | null;
   searchQuery: string;
+  lastFetchTime: number | null;
 }
 
 export interface SavedJobsState {
