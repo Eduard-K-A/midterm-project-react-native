@@ -66,7 +66,7 @@ const Divider: React.FC<{ color: string }> = ({ color }) => (
 const JobDetailScreen: React.FC = () => {
   const { params } = useRoute<RouteProp<ParamList, 'JobDetail'>>();
   const job = params.job;
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
   const guid = job.guid ?? '';
@@ -166,13 +166,25 @@ const JobDetailScreen: React.FC = () => {
           {/* Chips row */}
           <View style={styles.chipsRow}>
             {job.jobType ? (
-              <Chip label={job.jobType} bg={colors.primaryLight ?? colors.overlay} text={colors.primary} />
+              <Chip 
+                label={job.jobType} 
+                bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.surface)}
+                text={isDark ? colors.text : colors.primary}
+              />
             ) : null}
             {job.workModel ? (
-              <Chip label={job.workModel} bg={colors.overlay} text={colors.textMuted} />
+              <Chip 
+                label={job.workModel} 
+                bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.surface)}
+                text={isDark ? colors.text : colors.primary}
+              />
             ) : null}
             {job.seniorityLevel ? (
-              <Chip label={job.seniorityLevel} bg={colors.overlay} text={colors.textMuted} />
+              <Chip 
+                label={job.seniorityLevel} 
+                bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.surface)}
+                text={isDark ? colors.text : colors.primary}
+              />
             ) : null}
           </View>
         </View>
@@ -220,7 +232,12 @@ const JobDetailScreen: React.FC = () => {
             <SectionHeader label="Skills & Tags" color={colors.textMuted} />
             <View style={sectionStyles.tagsWrap}>
               {job.tags?.map((tag) => (
-                <Chip key={tag} label={tag} bg={colors.overlay} text={colors.text} />
+                <Chip 
+                  key={tag} 
+                  label={tag} 
+                  bg={isDark ? (colors.overlay || colors.border) : (colors.primaryLight || colors.border)}
+                  text={isDark ? colors.text : colors.primary}
+                />
               ))}
             </View>
           </View>
