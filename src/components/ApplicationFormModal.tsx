@@ -18,6 +18,9 @@ import { applicationSchema } from '../utils/validators';
 import { useTheme } from '../hooks/useTheme';
 import { styles } from './ApplicationFormModal.styles';
 import SuccessModal from './SuccessModal';
+import { useToast } from '../context/ToastContext';
+import { useAppDispatch } from '../store';
+import { persistMarkApplied } from '../store/appliedJobsSlice';
 
 const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   visible,
@@ -27,11 +30,13 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   sourceScreen,
 }) => {
   const { colors } = useTheme();
+  const { showToast } = useToast();
+  const dispatch = useAppDispatch();
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting },
     reset,
     watch,
   } = useForm<ApplicationFormData>({
@@ -56,18 +61,33 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
 
   const onSubmit = async (data: ApplicationFormData) => {
     try {
-      // show immediate feedback
       setLocalLoading(true);
-
       await new Promise((resolve) => setTimeout(resolve, 800));
-
       reset();
+      // Mark job as applied in Redux + AsyncStorage
+      if (job?.guid) {
+        dispatch(persistMarkApplied(job.guid));
+      }
       onSuccess();
       setSuccessVisible(true);
     } catch {
-      // set errors via form state - keep simple here
+      showToast('Something went wrong. Please try again.', 'error');
     } finally {
       setLocalLoading(false);
+    }
+  };
+
+  // Called when the user taps Submit but the form has validation errors
+  const handleInvalidSubmit = () => {
+    const firstError =
+      errors.name?.message ??
+      errors.email?.message ??
+      errors.contactNumber?.message ??
+      errors.whyShouldWeHireYou?.message;
+    if (firstError) {
+      showToast(firstError, 'error');
+    } else {
+      showToast('Please fill in all required fields.', 'error');
     }
   };
 
@@ -182,20 +202,12 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
                   onBlur={onBlur}
                   onChangeText={(text) => {
                     let next = String(text ?? '');
-                    // strip all non-digit characters so we can normalize prefixes
                     const digits = next.replace(/[^0-9]/g, '');
-
-                    // if user starts with international prefix, enforce +63 and keep rest
                     if (next.startsWith('+63')) {
                       next = '+63' + digits.slice(2);
-                    }
-                    // if they type 63 at beginning without plus (e.g. "63917...")
-                    // treat it as international as well, since that is a common pattern
-                    else if (digits.startsWith('63') && !next.startsWith('09')) {
+                    } else if (digits.startsWith('63') && !next.startsWith('09')) {
                       next = '+63' + digits.slice(2);
                     }
-                    // otherwise we just leave the value alone; user may be typing
-                    // local number (starting with 0) or something else.
                     onChange(next);
                   }}
                   value={value}
@@ -248,22 +260,22 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
           </View>
         </ScrollView>
         <View style={[styles.footer, { borderTopColor: colors.border }]}>
-            <Pressable
-              style={[
-                styles.submitButton,
-                {
-                  backgroundColor: isValid && !localLoading ? colors.primary : colors.border,
-                },
-              ]}
-              disabled={!isValid || localLoading}
-              onPress={handleSubmit(onSubmit)}
-            >
-              {localLoading ? (
-                <ActivityIndicator color={colors.onPrimary} />
-              ) : (
-                <Text style={[styles.submitButtonText, { color: colors.onPrimary }]}>Submit Application</Text>
-              )}
-            </Pressable>
+          <Pressable
+            style={[
+              styles.submitButton,
+              {
+                backgroundColor: !localLoading ? colors.primary : colors.border,
+              },
+            ]}
+            disabled={localLoading}
+            onPress={handleSubmit(onSubmit, handleInvalidSubmit)}
+          >
+            {localLoading ? (
+              <ActivityIndicator color={colors.onPrimary} />
+            ) : (
+              <Text style={[styles.submitButtonText, { color: colors.onPrimary }]}>Submit Application</Text>
+            )}
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
       <SuccessModal
@@ -279,4 +291,3 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
 };
 
 export default ApplicationFormModal;
-
