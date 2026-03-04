@@ -15,9 +15,11 @@ import { Job } from '../types';
 import { formatSalary } from '../utils/helpers';
 import { useAppDispatch, useAppSelector } from '../store';
 import { selectIsJobSaved, persistSaveJob, persistRemoveJob } from '../store/savedJobsSlice';
+import { selectIsJobApplied } from '../store/appliedJobsSlice';
 import ConfirmModal from '../components/ConfirmModal';
 import ApplicationFormModal from '../components/ApplicationFormModal';
 import { styles, sectionStyles } from './JobDetailScreen.styles';
+import { useToast } from '../context/ToastContext';
 
 type ParamList = {
   JobDetail: { job: Job };
@@ -69,8 +71,10 @@ const JobDetailScreen: React.FC = () => {
   const { colors, isDark } = useTheme();
   const navigation = useNavigation();
   const dispatch = useAppDispatch();
+  const { showToast } = useToast();
   const guid = job.guid ?? '';
   const isSaved = useAppSelector(selectIsJobSaved(guid));
+  const isApplied = useAppSelector(selectIsJobApplied(guid));
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -111,7 +115,11 @@ const JobDetailScreen: React.FC = () => {
   };
 
   const handleApply = () => {
-    setModalVisible(true);
+    if (isApplied) {
+      showToast('Already Applied', 'info');
+    } else {
+      setModalVisible(true);
+    }
   };
 
   const pubDate = formatDate(job.pubDate);
@@ -128,9 +136,9 @@ const JobDetailScreen: React.FC = () => {
       ul: { paddingLeft: 16 },
       ol: { paddingLeft: 16 },
       li: { marginBottom: 4 },
-      h1: { fontSize: 18, fontWeight: '700', color: colors.text },
-      h2: { fontSize: 16, fontWeight: '700', color: colors.text },
-      h3: { fontSize: 15, fontWeight: '600', color: colors.text },
+      h1: { fontSize: 18, fontWeight: 700 as const, color: colors.text },
+      h2: { fontSize: 16, fontWeight: 700 as const, color: colors.text },
+      h3: { fontSize: 15, fontWeight: 600 as const, color: colors.text },
       strong: { color: colors.text },
       a: { color: colors.primary },
     }),
@@ -298,14 +306,16 @@ const JobDetailScreen: React.FC = () => {
         <Pressable
           style={({ pressed }) => [
             styles.applyBtn,
-            { backgroundColor: colors.primary },
+            { backgroundColor: isApplied ? colors.border : colors.primary },
             pressed && { opacity: 0.85 },
           ]}
           onPress={handleApply}
           android_ripple={{ color: colors.overlay }}
-          accessibilityLabel="Apply for job"
+          accessibilityLabel={isApplied ? 'Already applied for job' : 'Apply for job'}
         >
-          <Text style={[styles.btnText, { color: colors.onPrimary }]}>Apply Now →</Text>
+          <Text style={[styles.btnText, { color: isApplied ? colors.textMuted : colors.onPrimary }]}>
+            {isApplied ? '✓ Already Applied' : 'Apply Now →'}
+          </Text>
         </Pressable>
       </View>
 
