@@ -2,11 +2,13 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import jobsReducer from './jobsSlice';
 import savedJobsReducer from './savedJobsSlice';
+import appliedJobsReducer from './appliedJobsSlice';
 
 export const store = configureStore({
   reducer: {
     jobs: jobsReducer,
     savedJobs: savedJobsReducer,
+    appliedJobs: appliedJobsReducer,
   },
 });
 

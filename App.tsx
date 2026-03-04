@@ -20,6 +20,8 @@ import { styles } from './App.styles';
 import { useEffect } from 'react';
 import { useAppDispatch } from './src/store';
 import { loadSavedJobs } from './src/store/savedJobsSlice';
+import { loadAppliedJobs } from './src/store/appliedJobsSlice';
+import { ToastProvider } from './src/context/ToastContext';
 
 const AppContent: React.FC = () => {
   const { colors, isDark } = useTheme();
@@ -27,13 +29,16 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     dispatch(loadSavedJobs());
+    dispatch(loadAppliedJobs());
   }, [dispatch]);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
-      <AppNavigator />
-    </View>
+    <ToastProvider>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <StatusBar style={isDark ? 'light' : 'dark'} />
+        <AppNavigator />
+      </View>
+    </ToastProvider>
   );
 };
 
