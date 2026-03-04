@@ -5,9 +5,11 @@ import { useTheme } from '../hooks/useTheme';
 import { formatSalary, getInitials } from '../utils/helpers';
 import { useAppDispatch, useAppSelector } from '../store';
 import { persistSaveJob, persistRemoveJob, selectIsJobSaved } from '../store/savedJobsSlice';
+import { selectIsJobApplied } from '../store/appliedJobsSlice';
 import { styles } from './JobCard.styles';
 import { useNavigation } from '@react-navigation/native';
 import ConfirmModal from './ConfirmModal';
+import { useToast } from '../context/ToastContext';
 
 interface JobCardProps {
   job: Job;
@@ -18,7 +20,9 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
+  const { showToast } = useToast();
   const isSaved = useAppSelector(selectIsJobSaved(job.guid));
+  const isApplied = useAppSelector(selectIsJobApplied(job.guid));
 
   const salaryLabel = useMemo(
     () => formatSalary(job.minSalary, job.maxSalary, job.currency),
@@ -34,11 +38,14 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
   };
 
   const handleApplyPress = (_event: GestureResponderEvent) => {
-    onApplyPress(job);
+    if (isApplied) {
+      showToast('Already Applied', 'info');
+    } else {
+      onApplyPress(job);
+    }
   };
 
   const handleCardPress = () => {
-    // navigate to detail screen with job payload
     // @ts-ignore - navigation typing from different navigators
     navigation.navigate('JobDetail', { job });
   };
@@ -111,12 +118,17 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
           </Text>
         </Pressable>
         <Pressable
-          style={[styles.applyButton, { backgroundColor: colors.primary }]}
+          style={[
+            styles.applyButton,
+            {
+              backgroundColor: isApplied ? colors.border : colors.primary,
+            },
+          ]}
           onPress={handleApplyPress}
           android_ripple={{ color: colors.overlay }}
         >
-          <Text style={[styles.applyButtonText, { color: colors.onPrimary }]}>
-            Apply
+          <Text style={[styles.applyButtonText, { color: isApplied ? colors.textMuted : colors.onPrimary }]}>
+            {isApplied ? '✓ Already Applied' : 'Apply'}
           </Text>
         </Pressable>
       </View>
@@ -133,4 +145,3 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
 };
 
 export default JobCard;
-
