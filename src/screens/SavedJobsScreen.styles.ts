@@ -1,53 +1,58 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
+  // ── Root container — safe area insets applied in JSX ──────────────────────
   container: {
     flex: 1,
     paddingHorizontal: 20,
   },
 
-  // ── Header ────────────────────────────────────────────────────
+  // ── Page header (title + theme toggle) ────────────────────────────────────
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    paddingTop: 4,
+    marginBottom: 16,
   },
   headerText: {
     flex: 1,
     marginRight: 12,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 32,
+    letterSpacing: -0.7,
+    lineHeight: 34,
+    fontFamily: 'Sora_700Bold',
   },
   subtitle: {
     fontSize: 13,
-    marginTop: 3,
+    marginTop: 4,
     lineHeight: 18,
+    letterSpacing: 0.1,
   },
 
-  // ── Count badge ───────────────────────────────────────────────
+  // ── Saved-count badge pill ─────────────────────────────────────────────────
   countBadge: {
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 50,
-    marginBottom: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 999,
+    marginBottom: 12,
   },
   countText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 
-  // ── List ──────────────────────────────────────────────────────
+  // ── Scrollable list container ─────────────────────────────────────────────
   listContent: {
-    paddingTop: 4,
+    paddingTop: 6,
   },
 
-  // ── Card wrapper + remove ─────────────────────────────────────
+  // ── Card wrapper with the Remove button pinned below each card ────────────
   cardWrapper: {
     marginBottom: 4,
   },
@@ -55,15 +60,17 @@ export const styles = StyleSheet.create({
     alignSelf: 'flex-end',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 50,
-    borderWidth: 1,
-    marginTop: 6,
-    marginBottom: 10,
+    gap: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    marginTop: 4,
+    marginBottom: 12,
   },
   removeBtnText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

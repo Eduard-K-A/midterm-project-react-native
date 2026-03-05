@@ -5,8 +5,8 @@ import {
   FlatList,
   Pressable,
   Platform,
-  StyleSheet,
   RefreshControl,
+  StyleSheet,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../hooks/useTheme';
@@ -31,13 +31,10 @@ const SavedJobsScreen: React.FC = () => {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<Job | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-
+  
   const onRefresh = useCallback(() => {
     setIsRefreshing(true);
-    // Simulate a refresh delay
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 500);
+    setTimeout(() => setIsRefreshing(false), 500);
   }, []);
 
   const handleApplyPress = useCallback((job: Job) => {
@@ -51,11 +48,13 @@ const SavedJobsScreen: React.FC = () => {
   };
 
   const handleRemoveJob = (job: Job) => {
+    // Stage the job for removal; wait for user confirmation in ConfirmModal
     setPendingRemove(job);
     setConfirmVisible(true);
   };
 
   const handleConfirmRemove = () => {
+    // persistRemoveJob removes from both Redux state and AsyncStorage
     if (pendingRemove) {
       dispatch(persistRemoveJob(pendingRemove.guid));
     }
@@ -63,9 +62,12 @@ const SavedJobsScreen: React.FC = () => {
     setConfirmVisible(false);
   };
 
+  // renderItem is extracted here to avoid an inline arrow function in the
+  // FlatList prop which would cause unnecessary re-renders
   const renderItem = ({ item }: { item: Job }) => (
     <View style={styles.cardWrapper}>
       <JobCard job={item} onApplyPress={handleApplyPress} />
+      {/* Remove button sits beneath each card with a destructive tint */}
       <Pressable
         style={({ pressed }) => [
           styles.removeBtn,
@@ -75,6 +77,7 @@ const SavedJobsScreen: React.FC = () => {
         onPress={() => handleRemoveJob(item)}
         android_ripple={{ color: colors.overlay }}
         accessibilityLabel={`Remove ${item.title} from saved jobs`}
+        accessibilityRole="button"
       >
         <Text style={[styles.removeBtnText, { color: colors.destructive }]}>
           ✕  Remove
@@ -89,6 +92,7 @@ const SavedJobsScreen: React.FC = () => {
         styles.container,
         {
           backgroundColor: colors.background,
+          // Respect the device notch / status bar height
           paddingTop: insets.top + (Platform.OS === 'ios' ? 8 : 12),
         },
       ]}
@@ -101,29 +105,37 @@ const SavedJobsScreen: React.FC = () => {
             Roles you're keeping an eye on
           </Text>
         </View>
+        {/* ThemeToggle reads and writes to ThemeContext internally */}
         <ThemeToggle />
       </View>
 
-      {/* ── Count badge ────────────────────────────────────────── */}
+      {/* ── Count badge — only rendered when there are saved jobs ── */}
       {savedJobs.length > 0 && (
-        <View style={[styles.countBadge, { 
-          backgroundColor: isDark ? (colors.overlay) : (colors.primaryLight),
-          borderColor: isDark ? colors.border : 'transparent',
-          borderWidth: isDark ? 0 : 1,
-        }]}>
+        <View
+          style={[
+            styles.countBadge,
+            {
+              // Use a subtle tinted background that adapts to the theme
+              backgroundColor: isDark ? colors.overlay : (colors.primaryLight ?? colors.surface),
+              borderColor: isDark ? colors.border : 'transparent',
+              borderWidth: isDark ? StyleSheet.hairlineWidth : 0,
+            },
+          ]}
+        >
           <Text style={[styles.countText, { color: isDark ? colors.textMuted : colors.primary }]}>
             {savedJobs.length} saved {savedJobs.length === 1 ? 'job' : 'jobs'}
           </Text>
         </View>
       )}
 
-      {/* ── List / Empty ───────────────────────────────────────── */}
+      {/* ── List / Empty state ──────────────────────────────────── */}
       {savedJobs.length === 0 ? (
         <EmptyState
           title="Nothing saved yet"
           description="Tap the save button on any job listing to keep it here for later."
         />
       ) : (
+        // FlatList virtualises only the visible rows — important for long lists
         <FlatList
           data={savedJobs}
           keyExtractor={(item) => item.guid}
@@ -144,6 +156,7 @@ const SavedJobsScreen: React.FC = () => {
         />
       )}
 
+      {/* ── Removal confirmation modal ──────────────────────────── */}
       <ConfirmModal
         visible={confirmVisible}
         title="Remove saved job?"
@@ -155,6 +168,7 @@ const SavedJobsScreen: React.FC = () => {
         }}
       />
 
+      {/* ── Application form modal (slides up from bottom) ──────── */}
       <ApplicationFormModal
         visible={modalVisible}
         job={selectedJob}
