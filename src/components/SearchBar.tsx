@@ -32,6 +32,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, placeholder 
 
   const handleSubmit = (_event: NativeSyntheticEvent<TextInputSubmitEditingEventData>) => {};
 
+  // Clears the search query — triggers re-filter via the parent's onChangeText
   const handleClear = () => {
     onChangeText('');
   };
