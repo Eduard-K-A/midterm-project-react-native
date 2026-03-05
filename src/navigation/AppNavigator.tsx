@@ -78,6 +78,9 @@ const TabNavigator: React.FC = () => {
   );
 };
 
+/**
+ * AppNavigator bridges the React Navigation theme with the app's ThemeContext
+ */
 const AppNavigator: React.FC = () => {
   const { isDark, colors } = useTheme();
 
