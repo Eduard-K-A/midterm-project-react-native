@@ -1,90 +1,84 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
   },
-
-  // ── Header ────────────────────────────────────────────────────
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    paddingTop: 4,
+    marginBottom: 16,
   },
   headerText: {
     flex: 1,
     marginRight: 12,
   },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: '800',
-    letterSpacing: -0.5,
-    lineHeight: 32,
+    letterSpacing: -0.7,
+    lineHeight: 34,
+    fontFamily: 'Sora_700Bold',
   },
   subtitle: {
     fontSize: 13,
-    marginTop: 3,
+    marginTop: 4,
     lineHeight: 18,
+    letterSpacing: 0.1,
   },
-
-  // ── Search ────────────────────────────────────────────────────
   searchWrapper: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
-
-  // ── Result count ──────────────────────────────────────────────
   resultCount: {
     fontSize: 12,
-    fontWeight: '500',
-    marginBottom: 8,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 10,
     paddingHorizontal: 2,
   },
-
-  // ── List ──────────────────────────────────────────────────────
   listContent: {
-    paddingTop: 4,
+    paddingTop: 6,
   },
   footerLoader: {
-    marginVertical: 16,
+    marginVertical: 20,
   },
-
-  // ── Skeleton ──────────────────────────────────────────────────
   skeletonContainer: {
-    marginTop: 4,
+    marginTop: 6,
+    gap: 14,
   },
-
-  // ── Error ─────────────────────────────────────────────────────
   errorContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 60,
-    paddingHorizontal: 24,
+    paddingBottom: 80,
+    paddingHorizontal: 32,
   },
   errorEmoji: {
-    fontSize: 40,
-    marginBottom: 12,
+    fontSize: 44,
+    marginBottom: 16,
   },
   errorTitle: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
-    marginBottom: 6,
+    marginBottom: 8,
     textAlign: 'center',
+    letterSpacing: -0.2,
   },
   errorText: {
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   retryBtn: {
     fontSize: 13,
     fontWeight: '700',
-    paddingHorizontal: 20,
-    paddingVertical: 9,
-    borderRadius: 50,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 999,
     borderWidth: 1.5,
     overflow: 'hidden',
   },
