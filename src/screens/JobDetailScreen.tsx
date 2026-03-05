@@ -83,6 +83,9 @@ const JobDetailScreen: React.FC = () => {
   // appears over the job card (transparent background) and uses the theme's
   // primary color for the back button. We use useFocusEffect instead of
   // useEffect so the options are re-applied every time the user returns.
+  // useFocusEffect re-applies header options every time the screen comes into
+  // focus (e.g. after navigating back from a modal) so the transparent header
+  // with primary-coloured back button is always correct
   useFocusEffect(
     useCallback(() => {
       navigation.setOptions({
@@ -96,6 +99,8 @@ const JobDetailScreen: React.FC = () => {
     }, [navigation, colors.primary])
   );
 
+  // useMemo prevents formatSalary from running on every render cycle;
+  // only recalculated when the salary or currency values actually change
   const salaryLabel = useMemo(
     () => formatSalary(job.minSalary, job.maxSalary, job.currency),
     [job.minSalary, job.maxSalary, job.currency]
@@ -103,8 +108,10 @@ const JobDetailScreen: React.FC = () => {
 
   const handleSave = () => {
     if (!isSaved) {
+      // persistSaveJob updates both Redux state and AsyncStorage atomically
       dispatch(persistSaveJob(job));
     } else {
+      // Show a confirm modal before unsaving — avoids accidental data loss
       setConfirmVisible(true);
     }
   };
@@ -116,6 +123,7 @@ const JobDetailScreen: React.FC = () => {
 
   const handleApply = () => {
     if (isApplied) {
+      // User has already applied — show informational toast instead of reopening form
       showToast('Already Applied', 'info');
     } else {
       setModalVisible(true);
