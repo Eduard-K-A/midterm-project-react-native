@@ -33,6 +33,8 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   const { showToast } = useToast();
   const dispatch = useAppDispatch();
 
+  // useForm with zodResolver wires our Zod schema directly into react-hook-form
+  // so validation runs automatically on every change (mode: 'onChange')
   const {
     control,
     handleSubmit,
@@ -50,6 +52,8 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
     },
   });
 
+  // watch() subscribes to the field value without re-registering the field;
+  // useMemo avoids recomputing .length on every unrelated render
   const whyValue = watch('whyShouldWeHireYou');
   const characterCount = useMemo(() => whyValue.length, [whyValue]);
 
@@ -62,9 +66,10 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({
   const onSubmit = async (data: ApplicationFormData) => {
     try {
       setLocalLoading(true);
+      // Artificial delay gives the spinner time to appear and feels deliberate
       await new Promise((resolve) => setTimeout(resolve, 800));
       reset();
-      // Mark job as applied in Redux + AsyncStorage
+      // Persist applied state so the job card shows 'Already Applied' globally
       if (job?.guid) {
         dispatch(persistMarkApplied(job.guid));
       }
