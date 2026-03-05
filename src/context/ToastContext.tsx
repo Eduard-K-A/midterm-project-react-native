@@ -16,6 +16,7 @@ interface ToastOptions {
 }
 
 interface ToastContextType {
+  /** Display a toast notification from anywhere in the component tree. */
   showToast: (message: string, type?: ToastType, duration?: number) => void;
 }
 
@@ -31,22 +32,28 @@ interface ToastProviderProps {
   children: ReactNode;
 }
 
+/**
+ * ToastProvider renders a single Toast component at the top of its subtree
+ * and exposes `showToast` via context. Any child can call `useToast()`
+ * without prop drilling or per-screen state.
+ */
 export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
   const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [type, setType] = useState<ToastType>('info');
+
+  // useRef for the timer so clearing it doesn't trigger a re-render
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showToast = useCallback(
     (msg: string, toastType: ToastType = 'info', duration: number = 2800) => {
-      // Clear any existing timer
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
+      if (timerRef.current) clearTimeout(timerRef.current);
+
       setMessage(msg);
       setType(toastType);
       setVisible(true);
 
+      // Auto-dismiss after the specified duration
       timerRef.current = setTimeout(() => {
         setVisible(false);
       }, duration);
