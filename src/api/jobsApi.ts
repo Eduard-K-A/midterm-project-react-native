@@ -37,49 +37,6 @@ interface JobsApiResponse {
   [key: string]: unknown;
 }
 
-
-/**
- * Maps a currency code to the matching symbol for display purposes.
- * Falls back to the raw code if the currency isn't in the lookup.
- */
-const formatSalary = (
-  minSalary: number | null | undefined,
-  maxSalary: number | null | undefined,
-  currency: string | undefined,
-): string | undefined => {
-  if (minSalary === null || minSalary === undefined) return undefined;
-
-  const currencySymbol =
-    currency === 'USD' ? '$'
-    : currency === 'EUR' ? '€'
-    : currency === 'GBP' ? '£'
-    : currency === 'CAD' ? 'C$'
-    : currency === 'BRL' ? 'R$'
-    : currency === 'ILS' ? '₪'
-    : currency || '';
-
-  if (maxSalary && maxSalary !== minSalary) {
-    return `${currencySymbol}${minSalary.toLocaleString()}–${currencySymbol}${maxSalary.toLocaleString()}`;
-  }
-  return `${currencySymbol}${minSalary.toLocaleString()}`;
-};
-
-const formatLocation = (locations: string[] | undefined): string => {
-  if (!locations || locations.length === 0) return 'Remote / Unspecified';
-  if (locations.length === 1) return locations[0];
-  if (locations.length <= 3) return locations.join(', ');
-  return `${locations.slice(0, 2).join(', ')}, +${locations.length - 2} more`;
-};
-
-const formatDate = (timestamp: number | undefined): string | undefined => {
-  if (!timestamp) return undefined;
-  return new Date(timestamp * 1000).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
-
 /**
  * Normalises a raw API job object into the strongly-typed `Job` interface.
  *
