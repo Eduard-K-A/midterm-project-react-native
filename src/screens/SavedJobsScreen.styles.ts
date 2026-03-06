@@ -50,21 +50,4 @@ export const styles = StyleSheet.create({
   cardWrapper: {
     marginBottom: 4,
   },
-  removeBtn: {
-    alignSelf: 'flex-end',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 999,
-    borderWidth: 1.5,
-    marginTop: 4,
-    marginBottom: 12,
-  },
-  removeBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
 });

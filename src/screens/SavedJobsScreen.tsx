@@ -6,7 +6,6 @@ import {
   Pressable,
   Platform,
   RefreshControl,
-  StyleSheet,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../hooks/useTheme";
@@ -70,27 +69,17 @@ const SavedJobsScreen: React.FC = () => {
   // FlatList prop which would cause unnecessary re-renders
   const renderItem = ({ item }: { item: Job }) => (
     <View style={styles.cardWrapper}>
-      <JobCard job={item} onApplyPress={handleApplyPress} />
-      {/* Remove button sits beneath each card with a destructive tint */}
-      <Pressable
-        style={({ pressed }) => [
-          styles.removeBtn,
-          { borderColor: colors.destructive },
-          pressed && { opacity: 0.6 },
-        ]}
-        onPress={() => handleRemoveJob(item)}
-        android_ripple={{ color: colors.overlay }}
-        accessibilityLabel={`Remove ${item.title} from saved jobs`}
-        accessibilityRole="button"
-      >
-        <Text style={[styles.removeBtnText, { color: colors.destructive }]}>
-          ✕ Remove
-        </Text>
-      </Pressable>
-    </View>
-  );
-
-  // filter saved jobs using case‑insensitive substring match against title, company or location
+      <JobCard
+        job={item}
+        onApplyPress={handleApplyPress}
+        leftAction={{
+          label: '✕ Remove',
+          onPress: () => handleRemoveJob(item),
+          color: colors.destructive,
+        }}
+         />
+  </View>
+);
   const filteredJobs = React.useMemo(() => {
     if (!searchQuery.trim()) return savedJobs;
     const lower = searchQuery.toLowerCase();
@@ -147,21 +136,7 @@ const SavedJobsScreen: React.FC = () => {
               placeholder="Search saved jobs..."
             />
           </View>
-
-          <View
-            style={[
-              {
-                // Use a subtle tinted background that adapts to the theme
-                backgroundColor: isDark
-                  ? colors.overlay
-                  : (colors.primaryLight ?? colors.surface),
-                borderColor: isDark ? colors.border : "transparent",
-              },
-            ]}
-          >
-             
-          </View>
- {/* count line — plain Text, identical to JobFinder's resultCount */}
+          
     <Text style={[styles.countText, { color: colors.textMuted }]}>
       {savedJobs.length} saved {savedJobs.length === 1 ? 'job' : 'jobs'}
     </Text>
