@@ -11,12 +11,19 @@ import { useNavigation } from '@react-navigation/native';
 import ConfirmModal from './ConfirmModal';
 import { useToast } from '../context/ToastContext';
 
+interface LeftAction {
+  label: string;
+  onPress: () => void;
+  color: string;
+}
+
 interface JobCardProps {
   job: Job;
   onApplyPress: (job: Job) => void;
+  leftAction?: LeftAction;
 }
 
-const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
+const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress, leftAction }) => {
   const { colors } = useTheme();
   const dispatch = useAppDispatch();
   const navigation = useNavigation();
@@ -120,23 +127,43 @@ const JobCard: React.FC<JobCardProps> = ({ job, onApplyPress }) => {
 
         {/* Action buttons */}
         <View style={styles.actionsRow}>
-          <Pressable
-            style={[
-              styles.saveButton,
-              {
-                backgroundColor: isSaved ? colors.success : 'transparent',
-                borderColor: isSaved ? colors.success : colors.border,
-              },
-            ]}
-            onPress={handleSavePress}
-            android_ripple={{ color: colors.border }}
-            accessibilityLabel={isSaved ? `Unsave ${job.title}` : `Save ${job.title}`}
-            accessibilityRole="button"
-          >
-            <Text style={[styles.saveButtonText, { color: isSaved ? colors.onSuccess : colors.text }]}>
-              {isSaved ? '✓ Saved' : 'Save'}
-            </Text>
-          </Pressable>
+          {leftAction ? (
+            <Pressable
+              style={[
+                styles.saveButton,
+                {
+                  backgroundColor: 'transparent',
+                  borderColor: leftAction.color,
+                },
+              ]}
+              onPress={leftAction.onPress}
+              android_ripple={{ color: colors.border }}
+              accessibilityLabel={leftAction.label}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.saveButtonText, { color: leftAction.color }]}> 
+                {leftAction.label}
+              </Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              style={[
+                styles.saveButton,
+                {
+                  backgroundColor: isSaved ? colors.success : 'transparent',
+                  borderColor: isSaved ? colors.success : colors.border,
+                },
+              ]}
+              onPress={handleSavePress}
+              android_ripple={{ color: colors.border }}
+              accessibilityLabel={isSaved ? `Unsave ${job.title}` : `Save ${job.title}`}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.saveButtonText, { color: isSaved ? colors.onSuccess : colors.text }]}>
+                {isSaved ? '✓ Saved' : 'Save'}
+              </Text>
+            </Pressable>
+          )}
 
           {/* Apply button — muted when already applied, primary CTA otherwise */}
           <Pressable
