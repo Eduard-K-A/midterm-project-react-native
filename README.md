@@ -25,7 +25,7 @@ This project is a polished, production-style Job Finder mobile application built
 ### Folder Structure
 
 - `src/api/jobsApi.ts`: Axios instance and job fetching utilities.
-- `src/components/`: Reusable UI components (job cards, search bar, skeletons, modal, theme toggle, empty states).
+- `src/components/`: Reusable UI components (job cards with customizable left action, search bar, skeletons, modal, theme toggle, empty states).
 - `src/navigation/AppNavigator.tsx`: Bottom tab + stack configuration.
 - `src/screens/`: Main job finder and saved jobs screens.
 - `src/store/`: Redux Toolkit store and slices for jobs and saved jobs.
@@ -47,6 +47,7 @@ The app integrates with the `https://empllo.com/api/v1` API.
 ### Core Features
 
 - Dark-first, editorial UI with light mode support.
+- Flexible job card component allowing overrides for the left action button.
 - Job listing screen with:
   - Debounced search across title, company, and location.
   - Pull-to-refresh.
@@ -54,6 +55,8 @@ The app integrates with the `https://empllo.com/api/v1` API.
   - Reusable job cards with save/apply actions.
 - Saved jobs screen with:
   - Persistent in-memory saved jobs via Redux.
+  - Search/filter bar to quickly locate saved roles.
+  - Inline remove action replacing the saved button (uses a new `leftAction` prop on `JobCard`).
   - Confirmation dialog on removal.
 - Full-screen application form modal:
   - Validated with Zod + React Hook Form.
