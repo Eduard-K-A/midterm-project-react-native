@@ -12,13 +12,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../hooks/useTheme';
 import { styles } from './SearchBar.styles';
 
+import { StyleProp, ViewStyle } from 'react-native';
+
 interface SearchBarProps {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, placeholder }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, placeholder, containerStyle }) => {
   const { colors } = useTheme();
   const scaleAnim = useRef(new Animated.Value(0.96)).current;
 
@@ -46,6 +49,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onChangeText, placeholder 
           borderColor: colors.border,
           transform: [{ scale: scaleAnim }],
         },
+        containerStyle,
       ]}
     >
       <Ionicons
