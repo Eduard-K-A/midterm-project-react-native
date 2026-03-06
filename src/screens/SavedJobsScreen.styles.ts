@@ -1,13 +1,10 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
-  // ── Root container — safe area insets applied in JSX ──────────────────────
   container: {
     flex: 1,
     paddingHorizontal: 20,
   },
-
-  // ── Page header (title + theme toggle) ────────────────────────────────────
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -33,26 +30,23 @@ export const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
 
-  // ── Saved-count badge pill ─────────────────────────────────────────────────
-  countBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 999,
-    marginBottom: 12,
-  },
-  countText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.3,
+  // mirrors JobFinder's searchWrapper
+  searchWrapper: {
+    marginBottom: 6,
   },
 
-  // ── Scrollable list container ─────────────────────────────────────────────
+  // mirrors JobFinder's resultCount exactly
+  countText: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 10,
+    paddingHorizontal: 2,
+  },
+
   listContent: {
     paddingTop: 6,
   },
-
-  // ── Card wrapper with the Remove button pinned below each card ────────────
   cardWrapper: {
     marginBottom: 4,
   },
