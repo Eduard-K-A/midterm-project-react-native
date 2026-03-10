@@ -62,7 +62,7 @@ The app integrates with the `https://empllo.com/api/v1` API.
   - Validated with Zod + React Hook Form.
   - Inline error messages, character counting, and disabled submit while invalid or submitting.
   - Success alerts tailored to the originating screen.
-- Global theming with a toggle in headers, applied consistently across screens and components.
+- Global theming (Light and Dark) with a toggle in headers, applied consistently across screens and components.
 
 ### Known Limitations / Future Improvements
 
